@@ -1,0 +1,154 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Default-deny catch-all
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Connection health check doc
+    match /test/connection {
+      allow read: if true;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() > 0 && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isValidTaskShape(data, expectedOwnerId) {
+      return data.id is string && data.id.size() > 0 && data.id.size() <= 128
+        && data.userId is string && data.userId == expectedOwnerId
+        && (!('documentNumber' in data) || (data.documentNumber is string && data.documentNumber.size() <= 100))
+        && data.title is string && data.title.size() > 0 && data.title.size() <= 300
+        && (!('description' in data) || (data.description is string && data.description.size() <= 2000))
+        && data.category is string && data.category.size() <= 100
+        && (!('assignee' in data) || (data.assignee is string && data.assignee.size() <= 200))
+        && data.priority is string && data.priority in ['urgent', 'high', 'medium', 'low']
+        && (!('status' in data) || (data.status is string && data.status in ['pending', 'in_progress', 'review', 'completed']))
+        && data.dueDate is string && data.dueDate.size() <= 20
+        && (!('dueTime' in data) || (data.dueTime is string && data.dueTime.size() <= 10))
+        && data.completed is bool
+        && (!('tags' in data) || (data.tags is list && data.tags.size() <= 20))
+        && (!('subtasks' in data) || (data.subtasks is list && data.subtasks.size() <= 50))
+        && (!('recurrence' in data) || (data.recurrence is string && data.recurrence in ['none', 'daily', 'weekly', 'monthly']))
+        && (!('timeSpent' in data) || data.timeSpent is number)
+        && (!('googleTaskId' in data) || (data.googleTaskId is string && data.googleTaskId.size() <= 200))
+        && (!('createdAt' in data) || (data.createdAt is string && data.createdAt.size() <= 60))
+        && (!('updatedAt' in data) || (data.updatedAt is string && data.updatedAt.size() <= 60));
+    }
+
+    function isValidTagShape(data, expectedOwnerId) {
+      return data.id is string && data.id.size() > 0 && data.id.size() <= 128
+        && data.userId is string && data.userId == expectedOwnerId
+        && data.name is string && data.name.size() > 0 && data.name.size() <= 100
+        && data.color is string && data.color.size() <= 100;
+    }
+
+    function isValidMeetingShape(data, expectedOwnerId) {
+      return data.id is string && data.id.size() > 0 && data.id.size() <= 128
+        && data.userId is string && data.userId == expectedOwnerId
+        && data.title is string && data.title.size() > 0 && data.title.size() <= 200
+        && data.date is string && data.date.size() <= 30
+        && (!('transcript' in data) || (data.transcript is string && data.transcript.size() <= 50000))
+        && data.summary is string && data.summary.size() <= 5000
+        && (!('keyPoints' in data) || (data.keyPoints is list && data.keyPoints.size() <= 50))
+        && (!('actionItems' in data) || (data.actionItems is list && data.actionItems.size() <= 50))
+        && (!('sentiment' in data) || (data.sentiment is string && data.sentiment.size() <= 100));
+    }
+
+    function isValidSettingsShape(data, expectedOwnerId) {
+      return data.userId is string && data.userId == expectedOwnerId
+        && data.darkMode is bool
+        && data.notificationsEnabled is bool
+        && (!('reminderMinutesBefore' in data) || data.reminderMinutesBefore is number)
+        && (!('mcpEndpoint' in data) || (data.mcpEndpoint is string && data.mcpEndpoint.size() <= 500))
+        && (!('mcpApiKey' in data) || (data.mcpApiKey is string && data.mcpApiKey.size() <= 200))
+        && (!('autoSyncGoogleTasks' in data) || data.autoSyncGoogleTasks is bool);
+    }
+
+    function isValidDiagnosticShape(data, expectedOwnerId) {
+      return data.id is string && data.id.size() > 0 && data.id.size() <= 128
+        && data.userId is string && data.userId == expectedOwnerId
+        && data.checkedAt is string && data.checkedAt.size() <= 60
+        && data.status is string && data.status.size() <= 60;
+    }
+
+    // Authenticated personal user scope
+    match /users/{userId} {
+      allow read, write: if isSignedIn() && request.auth.uid == userId;
+
+      match /tasks/{taskId} {
+        allow get, list: if isSignedIn() && request.auth.uid == userId;
+        allow create, update: if isSignedIn() && request.auth.uid == userId && isValidId(taskId) && isValidTaskShape(incoming(), userId);
+        allow delete: if isSignedIn() && request.auth.uid == userId && isValidId(taskId);
+      }
+
+      match /tags/{tagId} {
+        allow get, list: if isSignedIn() && request.auth.uid == userId;
+        allow create, update: if isSignedIn() && request.auth.uid == userId && isValidId(tagId) && isValidTagShape(incoming(), userId);
+        allow delete: if isSignedIn() && request.auth.uid == userId && isValidId(tagId);
+      }
+
+      match /meetings/{meetingId} {
+        allow get, list: if isSignedIn() && request.auth.uid == userId;
+        allow create, update: if isSignedIn() && request.auth.uid == userId && isValidId(meetingId) && isValidMeetingShape(incoming(), userId);
+        allow delete: if isSignedIn() && request.auth.uid == userId && isValidId(meetingId);
+      }
+
+      match /settings/{settingId} {
+        allow get, list: if isSignedIn() && request.auth.uid == userId;
+        allow create, update: if isSignedIn() && request.auth.uid == userId && isValidId(settingId) && isValidSettingsShape(incoming(), userId);
+        allow delete: if isSignedIn() && request.auth.uid == userId && isValidId(settingId);
+      }
+
+      match /diagnostics/{diagId} {
+        allow get, list: if isSignedIn() && request.auth.uid == userId;
+        allow create, update: if isSignedIn() && request.auth.uid == userId && isValidId(diagId) && isValidDiagnosticShape(incoming(), userId);
+        allow delete: if isSignedIn() && request.auth.uid == userId && isValidId(diagId);
+      }
+    }
+
+    // Default administrative unit workspace scope (don-vi-cong-vu)
+    match /workspaces/{workspaceId} {
+      allow read: if workspaceId == 'don-vi-cong-vu';
+
+      match /tasks/{taskId} {
+        allow get, list: if workspaceId == 'don-vi-cong-vu';
+        allow create, update: if workspaceId == 'don-vi-cong-vu' && isValidId(taskId) && isValidTaskShape(incoming(), 'don-vi-cong-vu');
+        allow delete: if workspaceId == 'don-vi-cong-vu' && isValidId(taskId);
+      }
+
+      match /tags/{tagId} {
+        allow get, list: if workspaceId == 'don-vi-cong-vu';
+        allow create, update: if workspaceId == 'don-vi-cong-vu' && isValidId(tagId) && isValidTagShape(incoming(), 'don-vi-cong-vu');
+        allow delete: if workspaceId == 'don-vi-cong-vu' && isValidId(tagId);
+      }
+
+      match /meetings/{meetingId} {
+        allow get, list: if workspaceId == 'don-vi-cong-vu';
+        allow create, update: if workspaceId == 'don-vi-cong-vu' && isValidId(meetingId) && isValidMeetingShape(incoming(), 'don-vi-cong-vu');
+        allow delete: if workspaceId == 'don-vi-cong-vu' && isValidId(meetingId);
+      }
+
+      match /settings/{settingId} {
+        allow get, list: if workspaceId == 'don-vi-cong-vu';
+        allow create, update: if workspaceId == 'don-vi-cong-vu' && isValidId(settingId) && isValidSettingsShape(incoming(), 'don-vi-cong-vu');
+        allow delete: if workspaceId == 'don-vi-cong-vu' && isValidId(settingId);
+      }
+
+      match /diagnostics/{diagId} {
+        allow get, list: if workspaceId == 'don-vi-cong-vu';
+        allow create, update: if workspaceId == 'don-vi-cong-vu' && isValidId(diagId) && isValidDiagnosticShape(incoming(), 'don-vi-cong-vu');
+        allow delete: if workspaceId == 'don-vi-cong-vu' && isValidId(diagId);
+      }
+    }
+  }
+}

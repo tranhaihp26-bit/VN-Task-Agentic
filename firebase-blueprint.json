@@ -1,0 +1,287 @@
+{
+  "entities": {
+    "Task": {
+      "title": "Task",
+      "description": "An administrative task record stored in Firestore",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique task identifier",
+          "maxLength": 128
+        },
+        "userId": {
+          "type": "string",
+          "description": "Owner UID or unit workspace identifier",
+          "maxLength": 128
+        },
+        "documentNumber": {
+          "type": "string",
+          "description": "Administrative document reference number",
+          "maxLength": 100
+        },
+        "title": {
+          "type": "string",
+          "description": "Title or abstract of the task",
+          "maxLength": 300
+        },
+        "description": {
+          "type": "string",
+          "description": "Detailed executive instructions",
+          "maxLength": 2000
+        },
+        "category": {
+          "type": "string",
+          "description": "Administrative domain category",
+          "maxLength": 100
+        },
+        "assignee": {
+          "type": "string",
+          "description": "Lead department or responsible officer",
+          "maxLength": 200
+        },
+        "priority": {
+          "type": "string",
+          "description": "Urgency level",
+          "enum": ["urgent", "high", "medium", "low"]
+        },
+        "status": {
+          "type": "string",
+          "description": "4-stage administrative workflow status",
+          "enum": ["pending", "in_progress", "review", "completed"]
+        },
+        "dueDate": {
+          "type": "string",
+          "description": "Target completion date (YYYY-MM-DD)",
+          "maxLength": 20
+        },
+        "dueTime": {
+          "type": "string",
+          "description": "Target completion time (HH:mm)",
+          "maxLength": 10
+        },
+        "completed": {
+          "type": "boolean",
+          "description": "Completion flag"
+        },
+        "tags": {
+          "type": "array",
+          "description": "Array of tag IDs"
+        },
+        "subtasks": {
+          "type": "array",
+          "description": "Array of workflow step items"
+        },
+        "recurrence": {
+          "type": "string",
+          "description": "Recurrence pattern",
+          "enum": ["none", "daily", "weekly", "monthly"]
+        },
+        "timeSpent": {
+          "type": "number",
+          "description": "Cumulative seconds spent processing this task"
+        },
+        "googleTaskId": {
+          "type": "string",
+          "description": "Associated Google Tasks ID if synced",
+          "maxLength": 200
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "Creation timestamp ISO string",
+          "maxLength": 60
+        },
+        "updatedAt": {
+          "type": "string",
+          "description": "Last update timestamp ISO string",
+          "maxLength": 60
+        }
+      },
+      "required": ["id", "userId", "title", "category", "priority", "dueDate", "completed"]
+    },
+    "Tag": {
+      "title": "Tag",
+      "description": "Classification tag for administrative tasks",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique tag ID",
+          "maxLength": 128
+        },
+        "userId": {
+          "type": "string",
+          "description": "Owner UID or unit workspace identifier",
+          "maxLength": 128
+        },
+        "name": {
+          "type": "string",
+          "description": "Display name of the tag",
+          "maxLength": 100
+        },
+        "color": {
+          "type": "string",
+          "description": "Tailwind color class or color code",
+          "maxLength": 100
+        }
+      },
+      "required": ["id", "userId", "name", "color"]
+    },
+    "MeetingRecord": {
+      "title": "MeetingRecord",
+      "description": "Conference minutes and executive conclusions record",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique meeting ID",
+          "maxLength": 128
+        },
+        "userId": {
+          "type": "string",
+          "description": "Owner UID or unit workspace identifier",
+          "maxLength": 128
+        },
+        "title": {
+          "type": "string",
+          "description": "Meeting title",
+          "maxLength": 200
+        },
+        "date": {
+          "type": "string",
+          "description": "Date of the meeting",
+          "maxLength": 30
+        },
+        "transcript": {
+          "type": "string",
+          "description": "Raw meeting transcript",
+          "maxLength": 50000
+        },
+        "summary": {
+          "type": "string",
+          "description": "Executive summary",
+          "maxLength": 5000
+        },
+        "keyPoints": {
+          "type": "array",
+          "description": "Key directives from the meeting"
+        },
+        "actionItems": {
+          "type": "array",
+          "description": "Assigned tasks identified in the meeting"
+        },
+        "sentiment": {
+          "type": "string",
+          "description": "Overall meeting status/sentiment",
+          "maxLength": 100
+        }
+      },
+      "required": ["id", "userId", "title", "date", "summary"]
+    },
+    "UserSettings": {
+      "title": "UserSettings",
+      "description": "System operating preferences and configuration",
+      "type": "object",
+      "properties": {
+        "userId": {
+          "type": "string",
+          "description": "Owner UID or unit workspace identifier",
+          "maxLength": 128
+        },
+        "darkMode": {
+          "type": "boolean",
+          "description": "Dark mode theme toggle"
+        },
+        "notificationsEnabled": {
+          "type": "boolean",
+          "description": "Deadline reminder notification preference"
+        },
+        "reminderMinutesBefore": {
+          "type": "number",
+          "description": "Minutes before deadline to remind"
+        },
+        "mcpEndpoint": {
+          "type": "string",
+          "description": "System interoperability endpoint URL",
+          "maxLength": 500
+        },
+        "mcpApiKey": {
+          "type": "string",
+          "description": "Interoperability authentication token",
+          "maxLength": 200
+        },
+        "autoSyncGoogleTasks": {
+          "type": "boolean",
+          "description": "Whether to auto-sync Google Tasks"
+        }
+      },
+      "required": ["userId", "darkMode", "notificationsEnabled"]
+    },
+    "SyncDiagnostic": {
+      "title": "SyncDiagnostic",
+      "description": "Diagnostic verification record for Firestore connectivity",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "maxLength": 128
+        },
+        "userId": {
+          "type": "string",
+          "maxLength": 128
+        },
+        "checkedAt": {
+          "type": "string",
+          "maxLength": 60
+        },
+        "status": {
+          "type": "string",
+          "maxLength": 60
+        }
+      },
+      "required": ["id", "userId", "checkedAt", "status"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}/tasks/{taskId}": {
+      "schema": "Task",
+      "description": "Collection of tasks owned by an authenticated user"
+    },
+    "/users/{userId}/tags/{tagId}": {
+      "schema": "Tag",
+      "description": "Collection of tags owned by an authenticated user"
+    },
+    "/users/{userId}/meetings/{meetingId}": {
+      "schema": "MeetingRecord",
+      "description": "Collection of meeting minutes owned by an authenticated user"
+    },
+    "/users/{userId}/settings/preferences": {
+      "schema": "UserSettings",
+      "description": "Document holding user settings and preferences"
+    },
+    "/users/{userId}/diagnostics/{diagId}": {
+      "schema": "SyncDiagnostic",
+      "description": "Diagnostic heartbeat records for authenticated user"
+    },
+    "/workspaces/{workspaceId}/tasks/{taskId}": {
+      "schema": "Task",
+      "description": "Collection of tasks in the default administrative unit workspace"
+    },
+    "/workspaces/{workspaceId}/tags/{tagId}": {
+      "schema": "Tag",
+      "description": "Collection of tags in the default administrative unit workspace"
+    },
+    "/workspaces/{workspaceId}/meetings/{meetingId}": {
+      "schema": "MeetingRecord",
+      "description": "Collection of meeting minutes in the default administrative unit workspace"
+    },
+    "/workspaces/{workspaceId}/settings/preferences": {
+      "schema": "UserSettings",
+      "description": "Document holding unit workspace settings"
+    },
+    "/workspaces/{workspaceId}/diagnostics/{diagId}": {
+      "schema": "SyncDiagnostic",
+      "description": "Diagnostic heartbeat records for the unit workspace"
+    }
+  }
+}

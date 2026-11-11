@@ -1,0 +1,151 @@
+@import "tailwindcss";
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme {
+  --font-sans: "Be Vietnam Pro", system-ui, -apple-system, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+  }
+
+  html,
+  body,
+  button,
+  input,
+  select,
+  textarea {
+    font-family: "Be Vietnam Pro", system-ui, -apple-system, sans-serif;
+  }
+
+  button:not(:disabled),
+  [role="button"]:not(:disabled),
+  select:not(:disabled) {
+    cursor: pointer;
+  }
+}
+
+@layer utilities {
+  .transition-Fast {
+    transition-property: transform, opacity, background-color, border-color, color, box-shadow;
+    transition-duration: 160ms;
+    transition-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .card-interactive {
+    transition: transform 160ms cubic-bezier(0.16, 1, 0.3, 1),
+      border-color 160ms cubic-bezier(0.16, 1, 0.3, 1),
+      box-shadow 160ms cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .card-interactive:hover {
+    transform: translateY(-1px);
+  }
+
+  .btn-interactive {
+    transition: transform 120ms cubic-bezier(0.16, 1, 0.3, 1),
+      background-color 150ms cubic-bezier(0.16, 1, 0.3, 1),
+      border-color 150ms cubic-bezier(0.16, 1, 0.3, 1),
+      opacity 150ms cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .btn-interactive:active:not(:disabled) {
+    transform: scale(0.98);
+  }
+
+  .animate-view-enter {
+    animation: viewFadeSlideIn 160ms cubic-bezier(0.16, 1, 0.3, 1) both;
+    will-change: transform, opacity;
+  }
+
+  .animate-modal-backdrop {
+    animation: backdropFadeIn 140ms cubic-bezier(0.16, 1, 0.3, 1) both;
+    will-change: opacity;
+  }
+
+  .animate-modal-panel {
+    animation: modalPanelEnter 170ms cubic-bezier(0.16, 1, 0.3, 1) both;
+    will-change: transform, opacity;
+  }
+
+  .animate-toast-enter {
+    animation: toastSlideDown 160ms cubic-bezier(0.16, 1, 0.3, 1) both;
+    will-change: transform, opacity;
+  }
+
+  .animate-tab-underline {
+    animation: tabUnderlineIn 160ms cubic-bezier(0.16, 1, 0.3, 1) both;
+    transform-origin: center;
+    will-change: transform, opacity;
+  }
+}
+
+@keyframes viewFadeSlideIn {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 6px, 0);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+@keyframes backdropFadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes modalPanelEnter {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 8px, 0) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+}
+
+@keyframes toastSlideDown {
+  from {
+    opacity: 0;
+    transform: translate3d(0, -8px, 0);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+@keyframes tabUnderlineIn {
+  from {
+    opacity: 0;
+    transform: scaleX(0.4);
+  }
+  to {
+    opacity: 1;
+    transform: scaleX(1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

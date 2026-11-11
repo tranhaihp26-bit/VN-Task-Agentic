@@ -1,0 +1,10 @@
+{
+  "name": "TaskFlow Pro - Smart Office Task Manager & AI Assistant",
+  "description": "Professional task management app for office workers with Google Tasks sync, AI meeting transcription & summarization, weekly performance reports, voice control, offline PWA support, and dark mode.",
+  "requestFramePermissions": [
+    "microphone"
+  ],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
